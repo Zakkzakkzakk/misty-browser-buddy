@@ -7,12 +7,19 @@ const corsHeaders = {
 
 const VESYNC_API = "https://smartapi.vesync.com";
 
+function toHex(buffer: ArrayBuffer): string {
+  return [...new Uint8Array(buffer)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 async function md5(text: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(text);
-  const hashBuffer = await crypto.subtle.digest("MD5", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  // Deno's std crypto supports MD5 unlike the native Web Crypto API
+  const { crypto: stdCrypto } = await import("https://deno.land/std@0.168.0/crypto/mod.ts");
+  const hashBuffer = await stdCrypto.subtle.digest("MD5", data);
+  return toHex(hashBuffer);
 }
 
 serve(async (req) => {
