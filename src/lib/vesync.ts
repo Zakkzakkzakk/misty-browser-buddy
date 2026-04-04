@@ -19,8 +19,8 @@ export interface VeSyncSession {
   accountId: string;
 }
 
-export async function vesyncLogin(email: string, password: string): Promise<VeSyncSession> {
-  const data = await callProxy({ action: "login", email, password });
+export async function vesyncLogin(email: string, password: string, region: string = "US"): Promise<VeSyncSession> {
+  const data = await callProxy({ action: "login", email, password, region });
   if (data?.result?.token) {
     return { token: data.result.token, accountId: data.result.accountID };
   }
