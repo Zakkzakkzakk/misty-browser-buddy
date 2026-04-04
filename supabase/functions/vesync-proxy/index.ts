@@ -110,7 +110,7 @@ serve(async (req) => {
             terminalId,
             timeZone: "America/New_York",
             token: "",
-            userCountryCode: "US",
+            userCountryCode,
             traceId: Date.now().toString(),
           }),
         }
