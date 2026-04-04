@@ -43,7 +43,8 @@ serve(async (req) => {
     const { action, ...params } = await req.json();
 
     if (action === "login") {
-      const { email, password } = params;
+      const { email, password, region } = params;
+      const userCountryCode = region || "US";
       const hashedPassword = await md5(password);
       const appId = randomAppId();
       const terminalId = randomTerminalId();
@@ -69,7 +70,7 @@ serve(async (req) => {
             terminalId,
             timeZone: "America/New_York",
             token: "",
-            userCountryCode: "US",
+            userCountryCode,
             appID: appId,
             sourceAppID: appId,
             traceId: Date.now().toString(),
@@ -109,7 +110,7 @@ serve(async (req) => {
             terminalId,
             timeZone: "America/New_York",
             token: "",
-            userCountryCode: "US",
+            userCountryCode,
             traceId: Date.now().toString(),
           }),
         }

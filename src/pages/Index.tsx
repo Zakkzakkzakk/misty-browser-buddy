@@ -17,8 +17,8 @@ const Index = () => {
     }
   }, []);
 
-  const handleLogin = async (email: string, password: string) => {
-    const s = await vesyncLogin(email, password);
+  const handleLogin = async (email: string, password: string, region: string) => {
+    const s = await vesyncLogin(email, password, region);
     localStorage.setItem(SESSION_KEY, JSON.stringify(s));
     setSession(s);
   };

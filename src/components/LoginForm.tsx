@@ -2,15 +2,33 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Droplets, Loader2 } from "lucide-react";
 
+const REGIONS = [
+  { code: "US", label: "United States" },
+  { code: "CA", label: "Canada" },
+  { code: "MX", label: "Mexico" },
+  { code: "GB", label: "United Kingdom" },
+  { code: "DE", label: "Germany" },
+  { code: "FR", label: "France" },
+  { code: "ES", label: "Spain" },
+  { code: "IT", label: "Italy" },
+  { code: "AU", label: "Australia" },
+  { code: "JP", label: "Japan" },
+  { code: "KR", label: "South Korea" },
+  { code: "CN", label: "China" },
+  { code: "BR", label: "Brazil" },
+];
+
 interface LoginFormProps {
-  onLogin: (email: string, password: string) => Promise<void>;
+  onLogin: (email: string, password: string, region: string) => Promise<void>;
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [region, setRegion] = useState("US");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,7 +37,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     setError("");
     setLoading(true);
     try {
-      await onLogin(email, password);
+      await onLogin(email, password, region);
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
@@ -64,6 +82,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               required
               className="bg-muted/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
             />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-secondary-foreground text-sm">Region</Label>
+            <Select value={region} onValueChange={setRegion}>
+              <SelectTrigger className="bg-muted/50 border-border/50 focus:border-primary/50 focus:ring-primary/20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {REGIONS.map((r) => (
+                  <SelectItem key={r.code} value={r.code}>{r.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {error && (
