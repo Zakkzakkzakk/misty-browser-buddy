@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,9 +17,7 @@ function toHex(buffer: ArrayBuffer): string {
 async function md5(text: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(text);
-  // Deno's std crypto supports MD5 unlike the native Web Crypto API
-  const { crypto: stdCrypto } = await import("https://deno.land/std@0.168.0/crypto/mod.ts");
-  const hashBuffer = await stdCrypto.subtle.digest("MD5", data);
+  const hashBuffer = await crypto.subtle.digest("MD5", data);
   return toHex(hashBuffer);
 }
 
