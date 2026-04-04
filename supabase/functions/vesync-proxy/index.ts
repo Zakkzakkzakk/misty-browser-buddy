@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,10 +17,21 @@ function toHex(buffer: ArrayBuffer): string {
 async function md5(text: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(text);
-  // Deno's std crypto supports MD5 unlike the native Web Crypto API
-  const { crypto: stdCrypto } = await import("https://deno.land/std@0.168.0/crypto/mod.ts");
-  const hashBuffer = await stdCrypto.subtle.digest("MD5", data);
+  const hashBuffer = await crypto.subtle.digest("MD5", data);
   return toHex(hashBuffer);
+}
+
+function randomAppId(): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+function randomTerminalId(): string {
+  return "2" + crypto.randomUUID().replace(/-/g, "");
 }
 
 serve(async (req) => {
@@ -33,31 +45,78 @@ serve(async (req) => {
     if (action === "login") {
       const { email, password } = params;
       const hashedPassword = await md5(password);
+      const appId = randomAppId();
+      const terminalId = randomTerminalId();
 
-      const res = await fetch(`${VESYNC_API}/cloud/v1/user/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          account: email,
-          password: hashedPassword,
-          devToken: "",
-          userType: 1,
-          method: "loginByEmail",
-          token: "",
-          traceId: Date.now().toString(),
-          timeZone: "America/New_York",
-          acceptLanguage: "en",
-          appVersion: "2.8.6",
-          phoneBrand: "SM-N975U1",
-          phoneOS: "Android",
-          clientInfo: "Chrome",
-          clientType: "1",
-          clientVersion: "",
-        }),
-      });
+      // Step 1: Auth - get authorizeCode
+      const authRes = await fetch(
+        `${VESYNC_API}/globalPlatform/api/accountAuth/v1/authByPWDOrOTM`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            password: hashedPassword,
+            method: "authByPWDOrOTM",
+            authProtocolType: "generic",
+            acceptLanguage: "en",
+            accountID: "",
+            clientInfo: "SM N9005",
+            clientType: "vesyncApp",
+            clientVersion: "VeSync 5.6.60",
+            debugMode: false,
+            osInfo: "Android",
+            terminalId,
+            timeZone: "America/New_York",
+            token: "",
+            userCountryCode: "US",
+            appID: appId,
+            sourceAppID: appId,
+            traceId: Date.now().toString(),
+            devToken: "",
+            userType: "1",
+          }),
+        }
+      );
 
-      const data = await res.json();
-      return new Response(JSON.stringify(data), {
+      const authData = await authRes.json();
+
+      if (authData?.code !== 0 || !authData?.result?.authorizeCode) {
+        return new Response(JSON.stringify(authData), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const authorizeCode = authData.result.authorizeCode;
+
+      // Step 2: Login - exchange authorizeCode for token
+      const loginRes = await fetch(
+        `${VESYNC_API}/user/api/accountManage/v1/loginByAuthorizeCode4Vesync`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            method: "loginByAuthorizeCode4Vesync",
+            authorizeCode,
+            acceptLanguage: "en",
+            accountID: "",
+            clientInfo: "SM N9005",
+            clientType: "vesyncApp",
+            clientVersion: "VeSync 5.6.60",
+            debugMode: false,
+            emailSubscriptions: false,
+            osInfo: "Android",
+            terminalId,
+            timeZone: "America/New_York",
+            token: "",
+            userCountryCode: "US",
+            traceId: Date.now().toString(),
+          }),
+        }
+      );
+
+      const loginData = await loginRes.json();
+      return new Response(JSON.stringify(loginData), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -65,7 +124,7 @@ serve(async (req) => {
     if (action === "getDevices") {
       const { token, accountId } = params;
 
-      const res = await fetch(`${VESYNC_API}/cloud/v2/deviceManaged/devices`, {
+      const res = await fetch(`${VESYNC_API}/cloud/v1/deviceManaged/devices`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -73,8 +132,8 @@ serve(async (req) => {
           accountID: accountId,
           timeZone: "America/New_York",
           acceptLanguage: "en",
-          appVersion: "2.8.6",
-          phoneBrand: "SM-N975U1",
+          appVersion: "5.6.60",
+          phoneBrand: "SM N9005",
           phoneOS: "Android",
           method: "devices",
           pageNo: 1,
@@ -100,8 +159,8 @@ serve(async (req) => {
           accountID: accountId,
           timeZone: "America/New_York",
           acceptLanguage: "en",
-          appVersion: "2.8.6",
-          phoneBrand: "SM-N975U1",
+          appVersion: "5.6.60",
+          phoneBrand: "SM N9005",
           phoneOS: "Android",
           method: "bypassV2",
           debugMode: false,
@@ -130,8 +189,8 @@ serve(async (req) => {
           accountID: accountId,
           timeZone: "America/New_York",
           acceptLanguage: "en",
-          appVersion: "2.8.6",
-          phoneBrand: "SM-N975U1",
+          appVersion: "5.6.60",
+          phoneBrand: "SM N9005",
           phoneOS: "Android",
           method: "bypassV2",
           debugMode: false,
