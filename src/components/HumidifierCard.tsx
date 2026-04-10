@@ -208,13 +208,14 @@ export function HumidifierCard({ device, session }: HumidifierCardProps) {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Mist Level</p>
-                <span className="text-sm font-mono text-primary">{mistLevel}</span>
+                <span className="text-sm font-mono text-primary">{localMistLevel}</span>
               </div>
               <Slider
-                value={[mistLevel]}
+                value={[localMistLevel]}
                 min={1}
                 max={9}
                 step={1}
+                onValueChange={(v) => setLocalMistLevel(v[0])}
                 onValueCommit={handleMistChange}
                 disabled={actionLoading || !isOn}
                 className="w-full"
