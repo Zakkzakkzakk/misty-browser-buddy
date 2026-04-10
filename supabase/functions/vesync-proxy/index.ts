@@ -6,7 +6,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const VESYNC_API = "https://smartapi.vesync.com";
+const VESYNC_API_US = "https://smartapi.vesync.com";
+const VESYNC_API_EU = "https://smartapi.vesync.eu";
+const NON_EU_COUNTRY_CODES = ["US", "CA", "MX", "JP"];
+
+function getApiBase(region: string): string {
+  return NON_EU_COUNTRY_CODES.includes(region) ? VESYNC_API_US : VESYNC_API_EU;
+}
 
 function toHex(buffer: ArrayBuffer): string {
   return [...new Uint8Array(buffer)]
