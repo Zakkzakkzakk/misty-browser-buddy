@@ -228,13 +228,14 @@ export function HumidifierCard({ device, session }: HumidifierCardProps) {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Target Humidity</p>
-                <span className="text-sm font-mono text-primary">{targetHumidity}%</span>
+                <span className="text-sm font-mono text-primary">{localTargetHumidity}%</span>
               </div>
               <Slider
-                value={[targetHumidity]}
+                value={[localTargetHumidity]}
                 min={30}
                 max={80}
                 step={5}
+                onValueChange={(v) => setLocalTargetHumidity(v[0])}
                 onValueCommit={handleTargetHumidity}
                 disabled={actionLoading || !isOn}
                 className="w-full"
