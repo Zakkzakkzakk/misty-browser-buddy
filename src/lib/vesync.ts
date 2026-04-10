@@ -17,12 +17,13 @@ async function callProxy(body: Record<string, unknown>) {
 export interface VeSyncSession {
   token: string;
   accountId: string;
+  region: string;
 }
 
 export async function vesyncLogin(email: string, password: string, region: string = "US"): Promise<VeSyncSession> {
   const data = await callProxy({ action: "login", email, password, region });
   if (data?.result?.token) {
-    return { token: data.result.token, accountId: data.result.accountID };
+    return { token: data.result.token, accountId: data.result.accountID, region };
   }
   throw new Error(data?.msg || "Login failed");
 }
@@ -32,6 +33,7 @@ export async function vesyncGetDevices(session: VeSyncSession) {
     action: "getDevices",
     token: session.token,
     accountId: session.accountId,
+    region: session.region,
   });
   return data?.result?.list || [];
 }
@@ -41,6 +43,7 @@ export async function vesyncGetStatus(session: VeSyncSession, device: { cid: str
     action: "deviceStatus",
     token: session.token,
     accountId: session.accountId,
+    region: session.region,
     cid: device.cid,
     uuid: device.uuid,
     configModule: device.configModule,
@@ -57,6 +60,7 @@ export async function vesyncControl(
     action: "deviceControl",
     token: session.token,
     accountId: session.accountId,
+    region: session.region,
     cid: device.cid,
     uuid: device.uuid,
     configModule: device.configModule,
