@@ -13,6 +13,7 @@ const REGIONS = [
   { code: "DE", label: "Germany" },
   { code: "FR", label: "France" },
   { code: "ES", label: "Spain" },
+  { code: "EE", label: "Estonia" },
   { code: "IT", label: "Italy" },
   { code: "AU", label: "Australia" },
   { code: "JP", label: "Japan" },
