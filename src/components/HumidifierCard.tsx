@@ -58,9 +58,15 @@ export function HumidifierCard({ device, session }: HumidifierCardProps) {
 
   const isOn = status?.enabled || status?.device_status === "on" || device.deviceStatus === "on";
   const humidity = status?.humidity ?? "--";
-  const mistLevel = status?.mist_virtual_level ?? status?.mist_level ?? 1;
+  const serverMistLevel = status?.mist_virtual_level ?? status?.mist_level ?? 1;
   const mode = status?.mode ?? "manual";
-  const targetHumidity = status?.target_humidity ?? status?.auto_target_humidity ?? 50;
+  const serverTargetHumidity = status?.configuration?.auto_target_humidity ?? status?.target_humidity ?? 50;
+
+  const [localMistLevel, setLocalMistLevel] = useState<number>(serverMistLevel);
+  const [localTargetHumidity, setLocalTargetHumidity] = useState<number>(serverTargetHumidity);
+
+  useEffect(() => { setLocalMistLevel(serverMistLevel); }, [serverMistLevel]);
+  useEffect(() => { setLocalTargetHumidity(serverTargetHumidity); }, [serverTargetHumidity]);
 
   const handleToggle = async () => {
     setActionLoading(true);
