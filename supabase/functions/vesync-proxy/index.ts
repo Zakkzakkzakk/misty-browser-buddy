@@ -51,13 +51,14 @@ serve(async (req) => {
     if (action === "login") {
       const { email, password, region } = params;
       const userCountryCode = region || "US";
+      const apiBase = getApiBase(userCountryCode);
       const hashedPassword = await md5(password);
       const appId = randomAppId();
       const terminalId = randomTerminalId();
 
       // Step 1: Auth - get authorizeCode
       const authRes = await fetch(
-        `${VESYNC_API}/globalPlatform/api/accountAuth/v1/authByPWDOrOTM`,
+        `${apiBase}/globalPlatform/api/accountAuth/v1/authByPWDOrOTM`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -98,7 +99,7 @@ serve(async (req) => {
 
       // Step 2: Login - exchange authorizeCode for token
       const loginRes = await fetch(
-        `${VESYNC_API}/user/api/accountManage/v1/loginByAuthorizeCode4Vesync`,
+        `${apiBase}/user/api/accountManage/v1/loginByAuthorizeCode4Vesync`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -129,9 +130,10 @@ serve(async (req) => {
     }
 
     if (action === "getDevices") {
-      const { token, accountId } = params;
+      const { token, accountId, region } = params;
+      const apiBase = getApiBase(region || "US");
 
-      const res = await fetch(`${VESYNC_API}/cloud/v1/deviceManaged/devices`, {
+      const res = await fetch(`${apiBase}/cloud/v1/deviceManaged/devices`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -156,9 +158,10 @@ serve(async (req) => {
     }
 
     if (action === "deviceControl") {
-      const { token, accountId, cid, uuid, configModule, payload } = params;
+      const { token, accountId, cid, uuid, configModule, payload, region } = params;
+      const apiBase = getApiBase(region || "US");
 
-      const res = await fetch(`${VESYNC_API}/cloud/v2/deviceManaged/bypassV2`, {
+      const res = await fetch(`${apiBase}/cloud/v2/deviceManaged/bypassV2`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -186,9 +189,10 @@ serve(async (req) => {
     }
 
     if (action === "deviceStatus") {
-      const { token, accountId, cid, uuid, configModule } = params;
+      const { token, accountId, cid, uuid, configModule, region } = params;
+      const apiBase = getApiBase(region || "US");
 
-      const res = await fetch(`${VESYNC_API}/cloud/v2/deviceManaged/bypassV2`, {
+      const res = await fetch(`${apiBase}/cloud/v2/deviceManaged/bypassV2`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
