@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "VeSync Humidifier Control",
+  "version": "1.0.0",
+  "description": "Control your VeSync humidifiers directly from Chrome",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
